@@ -1,0 +1,48 @@
+package com.tecsup.campusgps.viewmodel
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.tecsup.campusgps.data.LugaresRepository
+import com.tecsup.campusgps.data.UbicacionRepository
+import com.tecsup.campusgps.model.LugarConDistancia
+import com.tecsup.campusgps.model.UbicacionUi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+
+class MapaViewModel(
+    private val ubicacionRepo: UbicacionRepository,
+    private val lugaresRepo: LugaresRepository
+) : ViewModel() {
+
+    private val _estado = MutableStateFlow<UbicacionUi>(UbicacionUi.Inicial)
+    val estado: StateFlow<UbicacionUi> = _estado.asStateFlow()
+
+    private val _lugares = MutableStateFlow<List<LugarConDistancia>>(
+        lugaresRepo.obtenerLugares().map { LugarConDistancia(it, null) }
+    )
+    val lugares: StateFlow<List<LugarConDistancia>> = _lugares.asStateFlow()
+
+    private val _seleccionado = MutableStateFlow<Int?>(null)
+    val seleccionado: StateFlow<Int?> = _seleccionado.asStateFlow()
+
+    fun buscar() {
+        viewModelScope.launch {
+            _estado.value = UbicacionUi.Buscando
+            val res = ubicacionRepo.obtenerPosicion()
+            res.fold(
+                onSuccess = { pos ->
+                    _estado.value = UbicacionUi.Lista(pos)
+                },
+                onFailure = { err ->
+                    _estado.value = UbicacionUi.Error(err.message ?: "Error al obtener ubicación")
+                }
+            )
+        }
+    }
+
+    fun permisoDenegado() {
+        _estado.value = UbicacionUi.Error("Sin permiso de ubicación no puedo mostrar dónde estás")
+    }
+}
