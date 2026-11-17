@@ -36,6 +36,18 @@ fun MapaUbicacion(
         }
     }
 
+    LaunchedEffect(seleccionado) {
+        seleccionado?.let { id ->
+            val item = lugares.find { it.lugar.id == id }
+            item?.let {
+                val pos = LatLng(it.lugar.latitud, it.lugar.longitud)
+                cameraPositionState.animate(
+                    update = CameraUpdateFactory.newLatLngZoom(pos, 17f)
+                )
+            }
+        }
+    }
+
     GoogleMap(
         modifier = modifier,
         cameraPositionState = cameraPositionState

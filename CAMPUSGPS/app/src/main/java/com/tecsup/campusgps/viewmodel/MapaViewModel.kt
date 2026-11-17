@@ -53,6 +53,10 @@ class MapaViewModel(
         _lugares.value = lugaresActualizados
     }
 
+    fun seleccionar(id: Int?) {
+        _seleccionado.value = id
+    }
+
     fun permisoDenegado() {
         _estado.value = UbicacionUi.Error("Sin permiso de ubicación no puedo mostrar dónde estás")
     }

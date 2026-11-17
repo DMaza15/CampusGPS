@@ -70,9 +70,8 @@ fun PantallaMapa(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Button(
                     onClick = {
@@ -121,7 +120,7 @@ fun PantallaMapa(
                     is UbicacionUi.Lista -> {
                         Text(
                             text = "Lat: ${actualState.posicion.latitud}, Lng: ${actualState.posicion.longitud}",
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodySmall
                         )
                     }
                     is UbicacionUi.Error -> {
@@ -140,6 +139,15 @@ fun PantallaMapa(
                     }
                 }
             }
+
+            ListaLugares(
+                lugares = lugares,
+                seleccionadoId = seleccionado,
+                onClick = { id -> viewModel.seleccionar(id) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(220.dp)
+            )
         }
     }
 }
