@@ -20,6 +20,7 @@ fun MapaUbicacion(
     estado: UbicacionUi,
     lugares: List<LugarConDistancia>,
     seleccionado: Int?,
+    masCercanoId: Int? = null,
     modifier: Modifier = Modifier
 ) {
     val defaultPos = LatLng(-12.0464, -77.0428)
@@ -62,12 +63,19 @@ fun MapaUbicacion(
 
         lugares.forEach { item ->
             val lugar = item.lugar
+            val esMasCercano = lugar.id == masCercanoId
+            val markerColor = if (esMasCercano) {
+                BitmapDescriptorFactory.HUE_GREEN
+            } else {
+                BitmapDescriptorFactory.HUE_AZURE
+            }
+
             key(lugar.id) {
                 Marker(
                     state = MarkerState(position = LatLng(lugar.latitud, lugar.longitud)),
                     title = lugar.nombre,
                     snippet = lugar.categoria,
-                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
+                    icon = BitmapDescriptorFactory.defaultMarker(markerColor)
                 )
             }
         }
