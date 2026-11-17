@@ -2,11 +2,13 @@ package com.tecsup.campusgps.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.tecsup.campusgps.data.GpsDisabledException
 import com.tecsup.campusgps.data.LugaresRepository
 import com.tecsup.campusgps.data.UbicacionRepository
 import com.tecsup.campusgps.model.Lugar
 import com.tecsup.campusgps.model.LugarConDistancia
 import com.tecsup.campusgps.model.Posicion
+import com.tecsup.campusgps.model.TipoError
 import com.tecsup.campusgps.model.UbicacionUi
 import com.tecsup.campusgps.util.distanciaMetros
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,6 +44,14 @@ class MapaViewModel(
     )
 
     fun buscar() {
+        if (!ubicacionRepo.playServicesDisponible()) {
+            _estado.value = UbicacionUi.Error(
+                mensaje = "Este dispositivo no tiene Google Play Services",
+                tipo = TipoError.SIN_PLAY_SERVICES
+            )
+            return
+        }
+
         viewModelScope.launch {
             _estado.value = UbicacionUi.Buscando
             val res = ubicacionRepo.obtenerPosicion()
@@ -51,7 +61,15 @@ class MapaViewModel(
                     _estado.value = UbicacionUi.Lista(pos)
                 },
                 onFailure = { err ->
-                    _estado.value = UbicacionUi.Error(err.message ?: "Error al obtener ubicación")
+                    val tipo = if (err is GpsDisabledException) {
+                        TipoError.GPS_APAGADO
+                    } else {
+                        TipoError.OTRO
+                    }
+                    _estado.value = UbicacionUi.Error(
+                        mensaje = err.message ?: "Error al obtener ubicación",
+                        tipo = tipo
+                    )
                 }
             )
         }
@@ -70,6 +88,9 @@ class MapaViewModel(
     }
 
     fun permisoDenegado() {
-        _estado.value = UbicacionUi.Error("Sin permiso de ubicación no puedo mostrar dónde estás")
+        _estado.value = UbicacionUi.Error(
+            mensaje = "Sin permiso de ubicación no puedo mostrar dónde estás",
+            tipo = TipoError.SIN_PERMISO
+        )
     }
 }

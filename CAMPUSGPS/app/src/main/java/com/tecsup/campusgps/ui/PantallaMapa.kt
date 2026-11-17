@@ -44,6 +44,28 @@ fun PantallaMapa(
         }
     }
 
+    fun ejecutarAccion() {
+        val fineCheck = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
+        val coarseCheck = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+
+        if (fineCheck == PackageManager.PERMISSION_GRANTED || coarseCheck == PackageManager.PERMISSION_GRANTED) {
+            viewModel.buscar()
+        } else {
+            permissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -84,27 +106,7 @@ fun PantallaMapa(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Button(
-                        onClick = {
-                            val fineCheck = ContextCompat.checkSelfPermission(
-                                context,
-                                Manifest.permission.ACCESS_FINE_LOCATION
-                            )
-                            val coarseCheck = ContextCompat.checkSelfPermission(
-                                context,
-                                Manifest.permission.ACCESS_COARSE_LOCATION
-                            )
-
-                            if (fineCheck == PackageManager.PERMISSION_GRANTED || coarseCheck == PackageManager.PERMISSION_GRANTED) {
-                                viewModel.buscar()
-                            } else {
-                                permissionLauncher.launch(
-                                    arrayOf(
-                                        Manifest.permission.ACCESS_FINE_LOCATION,
-                                        Manifest.permission.ACCESS_COARSE_LOCATION
-                                    )
-                                )
-                            }
-                        },
+                        onClick = { ejecutarAccion() },
                         enabled = estado !is UbicacionUi.Buscando,
                         modifier = Modifier.weight(1f)
                     ) {
@@ -163,19 +165,10 @@ fun PantallaMapa(
                         )
                     }
                     is UbicacionUi.Error -> {
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = actualState.mensaje,
-                                color = MaterialTheme.colorScheme.onErrorContainer,
-                                modifier = Modifier.padding(8.dp),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
+                        MensajeError(
+                            error = actualState,
+                            onReintentar = { ejecutarAccion() }
+                        )
                     }
                 }
             }
