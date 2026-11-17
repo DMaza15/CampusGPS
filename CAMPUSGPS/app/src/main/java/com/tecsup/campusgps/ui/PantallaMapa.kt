@@ -25,6 +25,8 @@ fun PantallaMapa(
 ) {
     val context = LocalContext.current
     val estado by viewModel.estado.collectAsState()
+    val lugares by viewModel.lugares.collectAsState()
+    val seleccionado by viewModel.seleccionado.collectAsState()
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -55,81 +57,86 @@ fun PantallaMapa(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Button(
-                onClick = {
-                    val fineCheck = ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                    )
-                    val coarseCheck = ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                    )
+            MapaUbicacion(
+                estado = estado,
+                lugares = lugares,
+                seleccionado = seleccionado,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            )
 
-                    if (fineCheck == PackageManager.PERMISSION_GRANTED || coarseCheck == PackageManager.PERMISSION_GRANTED) {
-                        viewModel.buscar()
-                    } else {
-                        permissionLauncher.launch(
-                            arrayOf(
-                                Manifest.permission.ACCESS_FINE_LOCATION,
-                                Manifest.permission.ACCESS_COARSE_LOCATION
-                            )
-                        )
-                    }
-                },
-                enabled = estado !is UbicacionUi.Buscando
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                if (estado is UbicacionUi.Buscando) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        strokeWidth = 2.dp
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Buscando...")
-                } else {
-                    Text("Obtener mi ubicación")
-                }
-            }
+                Button(
+                    onClick = {
+                        val fineCheck = ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                        )
+                        val coarseCheck = ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        )
 
-            when (val actualState = estado) {
-                is UbicacionUi.Inicial -> {
-                    Text("Presiona el botón para obtener tu ubicación.")
-                }
-                is UbicacionUi.Buscando -> {
-                    Text("Obteniendo posición GPS...")
-                }
-                is UbicacionUi.Lista -> {
-                    Card(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                text = "Ubicación actual:",
-                                style = MaterialTheme.typography.titleMedium
+                        if (fineCheck == PackageManager.PERMISSION_GRANTED || coarseCheck == PackageManager.PERMISSION_GRANTED) {
+                            viewModel.buscar()
+                        } else {
+                            permissionLauncher.launch(
+                                arrayOf(
+                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                    Manifest.permission.ACCESS_COARSE_LOCATION
+                                )
                             )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text("Latitud: ${actualState.posicion.latitud}")
-                            Text("Longitud: ${actualState.posicion.longitud}")
                         }
+                    },
+                    enabled = estado !is UbicacionUi.Buscando
+                ) {
+                    if (estado is UbicacionUi.Buscando) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Buscando...")
+                    } else {
+                        Text("Obtener mi ubicación")
                     }
                 }
-                is UbicacionUi.Error -> {
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer
-                        ),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
+
+                when (val actualState = estado) {
+                    is UbicacionUi.Inicial -> {
+                        Text("Presiona el botón para obtener tu ubicación.")
+                    }
+                    is UbicacionUi.Buscando -> {
+                        Text("Obteniendo posición GPS...")
+                    }
+                    is UbicacionUi.Lista -> {
                         Text(
-                            text = actualState.mensaje,
-                            color = MaterialTheme.colorScheme.onErrorContainer,
-                            modifier = Modifier.padding(16.dp)
+                            text = "Lat: ${actualState.posicion.latitud}, Lng: ${actualState.posicion.longitud}",
+                            style = MaterialTheme.typography.bodyMedium
                         )
+                    }
+                    is UbicacionUi.Error -> {
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = actualState.mensaje,
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                modifier = Modifier.padding(12.dp)
+                            )
+                        }
                     }
                 }
             }
