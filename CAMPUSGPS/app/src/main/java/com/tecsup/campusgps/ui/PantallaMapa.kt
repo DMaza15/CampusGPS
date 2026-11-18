@@ -27,9 +27,10 @@ fun PantallaMapa(
 ) {
     val context = LocalContext.current
     val estado by viewModel.estado.collectAsState()
-    val lugares by viewModel.lugares.collectAsState()
+    val lugares by viewModel.lugaresFiltrados.collectAsState()
     val seleccionado by viewModel.seleccionado.collectAsState()
     val masCercano by viewModel.masCercano.collectAsState()
+    val categoriaFiltro by viewModel.categoriaFiltro.collectAsState()
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -83,6 +84,11 @@ fun PantallaMapa(
                 .fillMaxSize()
                 .padding(padding)
         ) {
+            FiltroCategorias(
+                categoriaSeleccionada = categoriaFiltro,
+                onCategoriaSeleccionada = { cat -> viewModel.seleccionarCategoria(cat) }
+            )
+
             MapaUbicacion(
                 estado = estado,
                 lugares = lugares,
@@ -96,7 +102,7 @@ fun PantallaMapa(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = 16.dp, vertical = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
@@ -179,7 +185,7 @@ fun PantallaMapa(
                 onClick = { id -> viewModel.seleccionar(id) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
+                    .height(180.dp)
             )
         }
     }
