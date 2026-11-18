@@ -11,6 +11,8 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -24,6 +26,7 @@ fun MapaUbicacion(
     seleccionado: Int?,
     masCercanoId: Int? = null,
     radioMetros: Int? = null,
+    tienePermisoUbicacion: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val defaultPos = LatLng(-12.0464, -77.0428)
@@ -54,7 +57,9 @@ fun MapaUbicacion(
 
     GoogleMap(
         modifier = modifier,
-        cameraPositionState = cameraPositionState
+        cameraPositionState = cameraPositionState,
+        properties = MapProperties(isMyLocationEnabled = tienePermisoUbicacion),
+        uiSettings = MapUiSettings(myLocationButtonEnabled = tienePermisoUbicacion)
     ) {
         if (estado is UbicacionUi.Lista) {
             val userPos = LatLng(estado.posicion.latitud, estado.posicion.longitud)

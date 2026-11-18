@@ -33,6 +33,11 @@ fun PantallaMapa(
     val categoriaFiltro by viewModel.categoriaFiltro.collectAsState()
     val radioSeleccionado by viewModel.radioSeleccionado.collectAsState()
 
+    val tienePermisoUbicacion = (
+        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+    )
+
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -47,16 +52,7 @@ fun PantallaMapa(
     }
 
     fun ejecutarAccion() {
-        val fineCheck = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        )
-        val coarseCheck = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        )
-
-        if (fineCheck == PackageManager.PERMISSION_GRANTED || coarseCheck == PackageManager.PERMISSION_GRANTED) {
+        if (tienePermisoUbicacion) {
             viewModel.buscar()
         } else {
             permissionLauncher.launch(
@@ -101,6 +97,7 @@ fun PantallaMapa(
                 seleccionado = seleccionado,
                 masCercanoId = masCercano?.id,
                 radioMetros = radioSeleccionado,
+                tienePermisoUbicacion = tienePermisoUbicacion,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
