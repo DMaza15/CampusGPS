@@ -31,6 +31,7 @@ fun PantallaMapa(
     val seleccionado by viewModel.seleccionado.collectAsState()
     val masCercano by viewModel.masCercano.collectAsState()
     val categoriaFiltro by viewModel.categoriaFiltro.collectAsState()
+    val radioSeleccionado by viewModel.radioSeleccionado.collectAsState()
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -89,11 +90,17 @@ fun PantallaMapa(
                 onCategoriaSeleccionada = { cat -> viewModel.seleccionarCategoria(cat) }
             )
 
+            FiltroRadio(
+                radioSeleccionado = radioSeleccionado,
+                onRadioSeleccionado = { radio -> viewModel.seleccionarRadio(radio) }
+            )
+
             MapaUbicacion(
                 estado = estado,
                 lugares = lugares,
                 seleccionado = seleccionado,
                 masCercanoId = masCercano?.id,
+                radioMetros = radioSeleccionado,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
@@ -102,7 +109,7 @@ fun PantallaMapa(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 6.dp),
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
@@ -185,7 +192,7 @@ fun PantallaMapa(
                 onClick = { id -> viewModel.seleccionar(id) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp)
+                    .height(160.dp)
             )
         }
     }
